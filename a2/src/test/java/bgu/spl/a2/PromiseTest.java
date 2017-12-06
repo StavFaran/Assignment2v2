@@ -32,6 +32,12 @@ public class PromiseTest {
         try {
             Integer toGet = p.get();
             assertFalse(toGet == null);
+            try {
+                p.resolve(6);
+                assertEquals(p.get(), (Integer) 6); // todo what resolve do?
+            }catch(Exception e){
+                Assert.fail();
+            }
         } catch (IllegalStateException e) {
             Assert.fail();
         } catch (Exception e) {
@@ -60,7 +66,7 @@ public class PromiseTest {
     @Test
     public void TestIsResolved() {
         try{
-            assertTrue(!p.isResolved());
+            assertFalse(p.isResolved());
             try{
                 p.resolve(6);
                 assertTrue(p.isResolved());
@@ -74,12 +80,44 @@ public class PromiseTest {
         }
     }
 
-    @Test
-    public void testSubscribe(callback cb){
-        if (!p.isResolved())
-            assertTrue(cb == null);
-        else{
-            assertEquals(cb, p.get());
+    public class TestCallback implements callback{
+        private boolean state = false;
+
+        public TestCallback(){
+
         }
+
+        public boolean getState(){
+            return state;
+        }
+        @Override
+        public void call() {
+            state = true;
+        }
+    }
+
+    @Test
+    public void testSubscribe(){
+        try {
+            TestCallback[] cb = new TestCallback[10];
+            for (TestCallback callBack : cb) {
+                p.subscribe(callBack);
+                assertFalse(callBack.getState());
+            }
+            p.resolve(6);
+            for (TestCallback callBack : cb) {
+                assertTrue(callBack.getState());
+            }
+
+            for (TestCallback callBack : cb) {
+                callBack = new TestCallback();
+                p.subscribe(callBack);
+                assertTrue(callBack.getState());
+            }
+        }catch(Exception ex){
+            Assert.fail();
+        }
+
+
     }
 }

@@ -74,23 +74,27 @@ public class VersionMonitorTest {
      *
      * */
     @Test
-    public void TestAwait(){
-        final int currentVersion = vm.getVersion();
-        Thread t1 = new Thread(()-> {
-            try {
-                vm.await(currentVersion);
-            } catch (InterruptedException e) {
-                Assert.fail();
-            }
-        });
-        t1.start();
-        vm.inc();
+    public void TestAwait() {
         try {
-            t1.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            final int currentVersion = vm.getVersion();
+            Thread t1 = new Thread(() -> {
+                try {
+                    vm.await(currentVersion);
+                } catch (InterruptedException e) {
+                    Assert.fail();
+                }
+            });
+            t1.start();
+            vm.inc();
+            try {
+                t1.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Assert.assertNotSame(currentVersion, vm.getVersion());
+        } catch (Exception ex) {
+            Assert.fail();
         }
-        Assert.assertNotSame((Integer)currentVersion, vm.getVersion());
     }
 }
 
