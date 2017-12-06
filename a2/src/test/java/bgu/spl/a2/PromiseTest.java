@@ -30,18 +30,12 @@ public class PromiseTest {
     @Test
     public void TestGet() {
         try {
-            Integer toGet = p.get();
-            assertFalse(toGet == null);
-            try {
-                p.resolve(6);
-                assertEquals(p.get(), (Integer) 6); // todo what resolve do?
-            }catch(Exception e){
-                Assert.fail();
-            }
+            p.get();
+            Assert.fail();
         } catch (IllegalStateException e) {
-            Assert.fail();
-        } catch (Exception e) {
-            Assert.fail();
+            p.resolve(6);
+            Integer toGet = p.get();
+            assertEquals(toGet.intValue(),  6);
         }
     }
 
@@ -81,10 +75,10 @@ public class PromiseTest {
     }
 
     public class TestCallback implements callback{
-        private boolean state = false;
+        private boolean state;
 
         public TestCallback(){
-
+            state = false;
         }
 
         public boolean getState(){
@@ -100,19 +94,21 @@ public class PromiseTest {
     public void testSubscribe(){
         try {
             TestCallback[] cb = new TestCallback[10];
-            for (TestCallback callBack : cb) {
-                p.subscribe(callBack);
-                assertFalse(callBack.getState());
+
+            for(int i=0; i<cb.length;i++){
+                cb[i] = new TestCallback();
+                p.subscribe(cb[i]);
+                assertFalse(cb[i].getState());
             }
             p.resolve(6);
-            for (TestCallback callBack : cb) {
-                assertTrue(callBack.getState());
+            for(int i=0; i<cb.length;i++){
+                assertTrue(cb[i].getState());
             }
 
-            for (TestCallback callBack : cb) {
-                callBack = new TestCallback();
-                p.subscribe(callBack);
-                assertTrue(callBack.getState());
+            for(int i=0; i<cb.length;i++){
+                cb[i] = new TestCallback();
+                p.subscribe(cb[i]);
+                assertTrue(cb[i].getState());
             }
         }catch(Exception ex){
             Assert.fail();
