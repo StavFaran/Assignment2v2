@@ -1,5 +1,7 @@
 package bgu.spl.a2;
 
+import java.util.HashMap;
+
 /**
  * represents an actor thread pool - to understand what this class does please
  * refer to your assignment.
@@ -11,6 +13,10 @@ package bgu.spl.a2;
  * methods
  */
 public class ActorThreadPool {
+
+	private int _nthreads;
+	private Thread[] myThreads;
+	HashMap<String, Actor> myHashMap;
 
 	/**
 	 * creates a {@link ActorThreadPool} which has nthreads. Note, threads
@@ -25,8 +31,12 @@ public class ActorThreadPool {
 	 *            pool
 	 */
 	public ActorThreadPool(int nthreads) {
-		// TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		_nthreads = nthreads;
+		myThreads = new Thread[_nthreads];
+		for(int i=0; i<_nthreads; i++)
+			myThreads[i] = new Thread();
+
+		myHashMap = new HashMap();
 	}
 
 	/**
@@ -39,10 +49,19 @@ public class ActorThreadPool {
 	 *            corresponding actor's id
 	 * @param actorState
 	 *            actor's private state (actor's information)
+	 *
+	 *            This function should be synchronized to keep it thread safe
 	 */
-	public void submit(Action<?> action, String actorId, PrivateState actorState) {
-		// TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+	public synchronized void submit(Action<?> action, String actorId, PrivateState actorState) {
+		Actor actorToUse;
+		if (myHashMap.containsKey(actorId)) {
+			actorToUse = myHashMap.get(actorId);
+			actorToUse.addActionToList(action);
+		}
+		else{
+			actorToUse = new Actor();
+
+		}
 	}
 
 	/**
@@ -64,8 +83,8 @@ public class ActorThreadPool {
 	 * start the threads belongs to this thread pool
 	 */
 	public void start() {
-		// TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		for(int i=0; i<_nthreads; i++)
+			myThreads[i].start();
 	}
 
 }

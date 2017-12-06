@@ -1,5 +1,7 @@
 package bgu.spl.a2;
 
+import java.util.LinkedList;
+
 /**
  * this class represents a deferred result i.e., an object that eventually will
  * be resolved to hold a result of some operation, the class allows for getting
@@ -17,6 +19,10 @@ package bgu.spl.a2;
  */
 public class Promise<T>{
 
+	private T result=null;
+	private boolean resolved=false;
+	private LinkedList<callback> mylist = new LinkedList<>();
+
 	/**
 	 *
 	 * @return the resolved value if such exists (i.e., if this object has been
@@ -26,8 +32,11 @@ public class Promise<T>{
 	 *             not yet resolved
 	 */
 	public T get() {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		if (!isResolved())
+			throw new IllegalStateException("object not resolved");
+		else{
+			return result;
+		}
 	}
 
 	/**
@@ -37,8 +46,7 @@ public class Promise<T>{
 	 *         before.
 	 */
 	public boolean isResolved() {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		return resolved;
 	}
 
 
@@ -55,9 +63,18 @@ public class Promise<T>{
 	 * @param value
 	 *            - the value to resolve this promise object with
 	 */
-	public void resolve(T value){
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+	public synchronized void resolve(T value){
+		if (resolved)
+			throw new IllegalStateException("this object is already resolved");
+		else{
+			resolved = true;
+			result = value;
+			for (callback callBack: mylist) {
+				callBack.call();
+			}
+			mylist.clear();
+		}
+
 	}
 
 	/**
@@ -72,9 +89,17 @@ public class Promise<T>{
 	 *
 	 * @param callback
 	 *            the callback to be called when the promise object is resolved
+	 *
+	 * this function needs to be synced so that the
 	 */
 	public void subscribe(callback callback) {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		if (callback == null)
+			throw new RuntimeException("callback can't be null");
+		else {
+			if (!isResolved())
+				mylist.add(callback);
+			else
+				callback.call();
+		}
 	}
 }
