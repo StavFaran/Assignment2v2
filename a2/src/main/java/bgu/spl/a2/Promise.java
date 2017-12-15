@@ -37,6 +37,8 @@ public class Promise<T>{
 		else{
 			return result;
 		}
+//		//TODO: replace method body with real implementation
+//		throw new UnsupportedOperationException("Not Implemented Yet.");
 	}
 
 	/**
@@ -101,5 +103,9 @@ public class Promise<T>{
 			else
 				callback.call();
 		}
+	}
+
+	public LinkedList<callback> getMylist(){
+		return mylist;
 	}
 }

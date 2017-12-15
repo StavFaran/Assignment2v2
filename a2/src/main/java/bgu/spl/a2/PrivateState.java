@@ -10,7 +10,7 @@ import java.util.List;
 public abstract class PrivateState {
 	
 	// holds the actions' name what were executed
-	private List<String> history;
+	protected List<String> history; //CHANGED
 
 	public List<String> getLogger(){
 		return history;
@@ -22,8 +22,7 @@ public abstract class PrivateState {
 	 * @param actionName
 	 */
 	public void addRecord(String actionName){
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		history.add(actionName);
 	}
 	
 	

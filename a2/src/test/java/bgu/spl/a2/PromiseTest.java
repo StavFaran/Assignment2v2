@@ -34,8 +34,11 @@ public class PromiseTest {
             Assert.fail();
         } catch (IllegalStateException e) {
             p.resolve(6);
-            Integer toGet = p.get();
-            assertEquals(toGet.intValue(),  6);
+            int toGet = p.get().intValue();
+            assertEquals(toGet,  6);
+        }
+        catch(UnsupportedOperationException ignore){
+            Assert.fail();
         }
     }
 
