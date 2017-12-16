@@ -1,5 +1,6 @@
 package bgu.spl.a2.sim.privateStates;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import bgu.spl.a2.PrivateState;
@@ -38,5 +39,13 @@ public class CoursePrivateState extends PrivateState{
 
 	public List<String> getPrequisites() {
 		return prequisites;
+	}
+
+	public void setPrequisites(LinkedList<String> prequisites){
+		this.prequisites = prequisites;
+	}
+
+	public void setAvailableSpots(int spots){
+		this.availableSpots = spots;
 	}
 }

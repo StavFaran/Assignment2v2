@@ -51,52 +51,6 @@ public class ActorThreadPoolTest {
         actorThreadPool.submit(action3, "stav", new BaseState());
         actorThreadPool.submit(action4, "infi", new BaseState());
         actorThreadPool.start();
-
-//        submit(new Action() {
-//
-//            @Override
-//            protected void start() {
-//                System.out.println("Action 1 of Actor a was called");
-//            }
-//        }, "stav", new PrivateState());
-//
-//        Actor b = new Actor("Bob");
-//        b.addActionToList(new Action() {
-//            @Override
-//            protected void start() {
-//                System.out.println("Action 1 of Actor b was called");
-//            }
-//        });
-//
-//        Actor c = new Actor("Caleb");
-//        c.addActionToList(new Action() {
-//            @Override
-//            protected void start() {
-//                System.out.println("Action 1 of Actor c was called");
-//            }
-//        });
-//
-//        b.addActionToList(new Action() {
-//            @Override
-//            protected void start() {
-//                System.out.println("Action 2 of Actor b was called");
-//            }
-//        });
-//
-//        actorThreadPool.addToList(a);
-//        actorThreadPool.addToList(b);
-//        actorThreadPool.addToList(c);
-//
-//        actorThreadPool.start();
-//
-//        a.addActionToList(new Action() {
-//            @Override
-//            protected void start() {
-//                System.out.println("Action 2 of Actor a was called");
-//            }
-//        });
-//        actorThreadPool.addToList(a);
-//    }
     }
 
 }
