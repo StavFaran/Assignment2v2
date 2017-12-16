@@ -46,6 +46,7 @@ public class ActorThreadPool {
 		actorListOfActions = new ConcurrentHashMap<>();
 		actorPrivateState = new ConcurrentHashMap<>();
 		actorIsLocked = new ConcurrentHashMap<>();
+		vm = new VersionMonitor();
 
 		myThreads = new Thread[this.nthreads];
 		for(int i=0; i<this.nthreads; i++) {
@@ -56,11 +57,7 @@ public class ActorThreadPool {
 					for (Map.Entry<String, AtomicBoolean> entry : actorIsLocked.entrySet()) {
 						if (entry.getValue().get() == false) {
 							String actor = entry.getKey();
-							if (!actorListOfActions.get(actor).isEmpty()) {
-								beforeFunctionCall(actor);
-								callAction(actor, actorPrivateState.get(actor));
-								afterFunctionCall(actor);
-							}
+							callAction(actor, actorPrivateState.get(actor));
 						}
 
 					}
@@ -138,14 +135,18 @@ public class ActorThreadPool {
 			myThreads[i].start();
 	}
 
-	public void callAction(String actorId, PrivateState actorState){
-		actorListOfActions.get(actorId).removeFirst().handle(this, actorId, actorState);
+	public synchronized void callAction(String actorId, PrivateState actorState){
+		if (!actorListOfActions.get(actorId).isEmpty()) {
+			beforeFunctionCall(actorId);
+			actorListOfActions.get(actorId).removeFirst().handle(this, actorId, actorState);
+			afterFunctionCall(actorId);
+		}
 	}
 
 	public void beforeFunctionCall(String actorId){
 		actorIsLocked.get(actorId).compareAndSet(false, true);
 	}
-	public void afterFunctionCall(String actorId) {
+	public synchronized void afterFunctionCall(String actorId) {
 		actorIsLocked.get(actorId).compareAndSet(true, false);
 		vm.inc();
 		notifyAll();

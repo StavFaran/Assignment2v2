@@ -19,7 +19,7 @@ public abstract class Action<R> {
 
     protected ActorThreadPool actorThreadPool;
     protected String actorId;
-    private String actionName=null;
+    protected String actionName=null;
     protected Promise<R> promise = new Promise<>();
     private callback myCallback=null;
     protected PrivateState actorState;
@@ -42,7 +42,7 @@ public abstract class Action<R> {
     * public/private/protected
     *
     */
-   /*package*/ final void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
+   /*package*/ final synchronized void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
        actorThreadPool = pool;
        this.actorId = actorId;
        this.actorState = actorState;
@@ -92,7 +92,7 @@ public abstract class Action<R> {
      *
      * @param result - the action calculated result
      */
-    protected final void complete(R result) {
+    protected synchronized final void complete(R result) {
        	promise.resolve(result);
 
     }

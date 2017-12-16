@@ -1,6 +1,7 @@
 package bgu.spl.a2;
 
 import bgu.spl.a2.TestClass.ActionBasic;
+import bgu.spl.a2.TestClass.ActionExtended;
 import bgu.spl.a2.TestClass.BaseState;
 import org.junit.After;
 import org.junit.Before;
@@ -42,7 +43,13 @@ public class ActorThreadPoolTest {
     public void start() throws Exception {
 
         Action<Integer> action = new ActionBasic();
+        Action<Integer> action2 = new ActionBasic();
+        Action<Integer> action3 = new ActionBasic();
+        Action<Integer> action4 = new ActionExtended();
         actorThreadPool.submit(action, "stav", new BaseState());
+        actorThreadPool.submit(action2, "natalie", new BaseState());
+        actorThreadPool.submit(action3, "stav", new BaseState());
+        actorThreadPool.submit(action4, "infi", new BaseState());
         actorThreadPool.start();
 
 //        submit(new Action() {
