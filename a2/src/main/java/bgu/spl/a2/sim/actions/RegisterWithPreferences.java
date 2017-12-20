@@ -4,7 +4,6 @@ import bgu.spl.a2.Action;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 
 import java.util.LinkedList;
-import java.util.List;
 
 public class RegisterWithPreferences extends Action{
     private LinkedList<String> preferenceList;
@@ -17,14 +16,13 @@ public class RegisterWithPreferences extends Action{
     protected void start() {
         LinkedList<Action> listOfActions = new LinkedList<>();
 
-        preferenceList.
-        for(String preference: preferenceList)
-            listOfActions.add(new );
+        if (!preferenceList.isEmpty())
+            listOfActions.add(new ParticipatingInCourse(preferenceList.getFirst(), actorId));
 
         then(listOfActions, ()->{
-            if ((boolean) listOfActions.getFirst().getResult().get()){
-                courseState.getRegStudents().add(studentName);
-                courseState.setAvailableSpots(courseState.getAvailableSpots()-1);
+            if (!(boolean) listOfActions.getFirst().getResult().get()){
+                preferenceList.removeFirst();
+                sendMessage(new RegisterWithPreferences(preferenceList), actorId, new CoursePrivateState());
             }
             complete(0);
         });
