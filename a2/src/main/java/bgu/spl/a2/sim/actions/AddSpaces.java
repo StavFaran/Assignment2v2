@@ -5,6 +5,7 @@ import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 
 import java.util.LinkedList;
 
+//This action is in the Course actor
 public class AddSpaces extends Action {
     private int num;
 

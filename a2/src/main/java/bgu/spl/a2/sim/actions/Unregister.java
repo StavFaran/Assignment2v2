@@ -7,6 +7,7 @@ import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
 import java.util.LinkedList;
 
+//This action is in course actor
 public class Unregister extends Action {
         private String studentId;
 
@@ -19,22 +20,15 @@ public class Unregister extends Action {
     protected void start() {
         LinkedList<Action> listOfActions = new LinkedList<>();
 
-        listOfActions.add (new Action(){
-            @Override
-            protected void start() {
-                then(new LinkedList<>(), ()->{
-                    boolean result = ((CoursePrivateState)actorState).getRegStudents().contains(studentId);
-                    complete(result);
-                });
-            }
-        });
+        if (((CoursePrivateState)actorState).getRegStudents().contains(studentId)) {
 
-        then(listOfActions, ()->{
-            actorThreadPool.submit(new RemoveFromGrades(actorId), studentId, new StudentPrivateState());
-            ((CoursePrivateState)actorState).getRegStudents().add(studentId);
-            ((CoursePrivateState)actorState).setAvailableSpots(((CoursePrivateState)actorState).getAvailableSpots()-1);
-            complete(0);
-        });
+            then(listOfActions, () -> {
+                actorThreadPool.submit(new RemoveFromGrades(actorId), studentId, new StudentPrivateState());
+                ((CoursePrivateState) actorState).getRegStudents().add(studentId);
+                ((CoursePrivateState) actorState).setAvailableSpots(((CoursePrivateState) actorState).getAvailableSpots() - 1);
+                complete(0);
+            });
+        }else{complete(0);}
     }
 }
 

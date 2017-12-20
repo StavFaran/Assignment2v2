@@ -1,40 +1,31 @@
 package bgu.spl.a2.sim.actions;
 
 import bgu.spl.a2.Action;
+import bgu.spl.a2.sim.actions.OpenNewCourseActions.SetCourseInitials;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.DepartmentPrivateState;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
 import java.util.LinkedList;
 
+//This Action is in the Department actor
 public class OpenNewCourse extends Action {
 
-    private String departmentName;
     private String courseName;
-    private int spotsAvailable;
+    private int availableSpots;
     private LinkedList<String> prerequisites;
 
-    public OpenNewCourse(String departmentName, String courseName,int spots, LinkedList<String> prerequisities){
+    public OpenNewCourse(String courseName, int availableSpots, LinkedList<String> prerequisities){
         actionName = "Open a new Course";
-        this.departmentName = departmentName;
         this.courseName = courseName;
-        this.spotsAvailable = spots;
+        this.availableSpots = availableSpots;
         this.prerequisites = prerequisities;
     }
     @Override
     protected void start() {
         LinkedList<Action> listOfActions = new LinkedList<>();
 
-        listOfActions.add(new Action() {
-            @Override
-            protected void start() {
-                then(new LinkedList<>(), ()->{
-                    ((CoursePrivateState)actorState).setAvailableSpots(spotsAvailable);
-                    ((CoursePrivateState)actorState).setPrequisites(prerequisites);
-                    complete(0);
-                });
-            }
-        });
+        listOfActions.add(new SetCourseInitials(availableSpots, prerequisites));
 
         sendMessage(listOfActions.getFirst(), courseName, new CoursePrivateState());
 
