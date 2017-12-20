@@ -7,10 +7,11 @@ import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
 import java.util.LinkedList;
 
+//This Action is in the Department's actor.
 public class AddNewStudent extends Action{
     private String studentName;
 
-    public AddNewStudent(String studentId){
+    public AddNewStudent(String studentName){
         actionName = "Add a new Student";
         this.studentName = studentName;
     }

@@ -32,8 +32,7 @@ public class Simulator {
 	* @param myActorThreadPool - the ActorThreadPool which will be used by the simulator
 	*/
 	public static void attachActorThreadPool(ActorThreadPool myActorThreadPool){
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		actorThreadPool = myActorThreadPool;
 	}
 	
 	/**
@@ -46,8 +45,8 @@ public class Simulator {
 	}
 	
 	
-	public static int main(String [] args){
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+	public static void main(String [] args){
+		//From the args I think we need to call attachThreadPool using a specified pool
+		start();
 	}
 }

@@ -15,7 +15,7 @@ public class IsValidRegister extends  Action{
     private List<String> prerequisits;
     private Map<String,Integer> grades;
 
-    public IsValidRegister(LinkedList<String> prerequisits){
+    public IsValidRegister(List<String> prerequisits){
         actionName = "isValidRegister";
         this.prerequisits = prerequisits ;
         this.grades = ((StudentPrivateState)actorThreadPool.getPrivaetState(actorId)).getGrades();

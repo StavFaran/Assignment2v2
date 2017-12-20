@@ -6,15 +6,16 @@ import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 import java.util.LinkedList;
 import java.util.Map;
 
+//This action is in the Student's actor
 public class AddGradeToStudent extends Action{
-    private String studentName;
     private String courseName;
+    private int grade;
     private Map grades;
 
-    public AddGradeToStudent (String studentName, String courseName){
-        this.studentName = studentName;
+    public AddGradeToStudent (String courseName, int grade){
         this.courseName = courseName;
-        grades = ((StudentPrivateState)actorThreadPool.getActors().get(studentName)).getGrades();
+        this.grade = grade;
+        grades = ((StudentPrivateState)actorThreadPool.getActors().get(actorId)).getGrades();
     }
 
 
@@ -22,15 +23,9 @@ public class AddGradeToStudent extends Action{
     protected void start() {
         LinkedList<Action> listOfActions = new LinkedList<>();
 
-        listOfActions.add(new IsSpotsAvailable(courseName));
-        listOfActions.add(new IsValidRegister(studentName, courseName));
-
-
         then(listOfActions, ()->{
-            boolean result = (boolean)listOfActions.get(0).getResult().get() && (boolean)listOfActions.get(1).getResult().get();
-            if (result)
-                grades.put(courseName, 0);
-            complete(result);
+            grades.put(courseName, grade);
+            complete(0);
         });
     }
 }

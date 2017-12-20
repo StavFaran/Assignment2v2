@@ -7,17 +7,16 @@ import bgu.spl.a2.sim.privateStates.DepartmentPrivateState;
 
 import java.util.LinkedList;
 
+//This action is in the Department actor
 public class CloseCourse extends Action {
 
     private DepartmentPrivateState depState;
     private String courseName;
-    private String departmentName;
 
-    public CloseCourse(String departmentName, String courseName){
+    public CloseCourse(String courseName){
         actionName = "Close A Course";
         this.courseName = courseName;
-        this.departmentName = departmentName;
-        depState = (DepartmentPrivateState)actorThreadPool.getPrivaetState(departmentName);
+        depState = (DepartmentPrivateState)actorThreadPool.getPrivaetState(actorId);
     }
     @Override
     protected void start() {
