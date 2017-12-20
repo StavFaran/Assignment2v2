@@ -27,6 +27,8 @@ public class ParticipatingInCourse extends Action {
 
         listOfActions.add(new AddGradeToStudent(studentName, courseName));
 
+        sendMessage(listOfActions.getFirst(), studentName, new StudentPrivateState());
+
         then(listOfActions, ()->{
             if ((boolean) listOfActions.getFirst().getResult().get()){
                 courseState.getRegStudents().add(studentName);

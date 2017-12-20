@@ -5,23 +5,20 @@ import bgu.spl.a2.ActorThreadPool;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.DepartmentPrivateState;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
+import sun.awt.image.ImageWatched;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class IsValidRegister extends  Action{
-    private String studentName;
-    private String courseName;
     private List<String> prerequisits;
     private Map<String,Integer> grades;
 
-    public IsValidRegister(String studentName, String courseName){
+    public IsValidRegister(LinkedList<String> prerequisits){
         actionName = "isValidRegister";
-        this.studentName = studentName;
-        this.courseName = courseName;
-        this.prerequisits = ((CoursePrivateState)actorThreadPool.getPrivaetState(courseName)).getPrequisites() ;
-        this.grades = ((StudentPrivateState)actorThreadPool.getPrivaetState(studentName)).getGrades();
+        this.prerequisits = prerequisits ;
+        this.grades = ((StudentPrivateState)actorThreadPool.getPrivaetState(actorId)).getGrades();
     }
     @Override
     protected void start() {
