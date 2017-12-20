@@ -1,6 +1,8 @@
 package bgu.spl.a2.sim;
 import bgu.spl.a2.Promise;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * 
  * this class is related to {@link Computer}
@@ -11,7 +13,8 @@ import bgu.spl.a2.Promise;
  *
  */
 public class SuspendingMutex {
-	
+
+	private AtomicBoolean isLocked;
 	
 	/**
 	 * Computer acquisition procedure
@@ -23,8 +26,11 @@ public class SuspendingMutex {
 	 * @return a promise for the requested computer
 	 */
 	public Promise<Computer> down(String computerType){
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		if (!isLocked.compareAndSet(false, true)){
+			Promise<Computer> promise = new Promise<>();
+			//todo Add the promise list structure that te mutex holds
+			return promise;
+		}else return null;
 	}
 	/**
 	 * Computer return procedure
@@ -33,7 +39,6 @@ public class SuspendingMutex {
 	 * @param computer
 	 */
 	public void up(Computer computer){
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		isLocked.compareAndSet(true, false);
 	}
 }

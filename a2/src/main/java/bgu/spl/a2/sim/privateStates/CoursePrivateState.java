@@ -12,7 +12,7 @@ public class CoursePrivateState extends PrivateState{
 
 	private Integer availableSpots;
 	private Integer registered;
-	private List<String> regStudents;
+	protected List<String> regStudents;
 	private List<String> prequisites;
 	
 	/**

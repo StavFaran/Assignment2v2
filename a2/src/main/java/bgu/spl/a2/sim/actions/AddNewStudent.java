@@ -8,21 +8,29 @@ import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 import java.util.LinkedList;
 
 public class AddNewStudent extends Action{
-    private DepartmentPrivateState myDepState;
     private String studentId;
 
-    public AddNewStudent(String studentId, DepartmentPrivateState depState){
+    public AddNewStudent(String studentId){
         actionName = "Add a new Student";
         this.studentId = studentId;
-        myDepState = depState;
     }
     @Override
     protected void start() {
         LinkedList<Action> listOfActions = new LinkedList<>();
 
+        listOfActions.add(new Action() {
+            @Override
+            protected void start() {
+                then(new LinkedList<>(), ()->{
+                    complete(0);
+                });
+            }
+        });
+
+        sendMessage(listOfActions.getFirst(), studentId, new StudentPrivateState());
+
         then(listOfActions, ()->{
-            myDepState.getStudentList().add(studentId);
-            StudentPrivateState studentPrivateState = new StudentPrivateState();
+            ((DepartmentPrivateState)actorState).getStudentList().add(studentId);
             complete(0);
         });
     }
