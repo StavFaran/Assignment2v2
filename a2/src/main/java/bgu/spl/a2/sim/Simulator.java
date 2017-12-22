@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import bgu.spl.a2.ActorThreadPool;
 import bgu.spl.a2.PrivateState;
+import com.google.gson.Gson;
 
 /**
  * A class describing the simulator for part 2 of the assignment
@@ -47,6 +48,10 @@ public class Simulator {
 	
 	public static void main(String [] args){
 		//From the args I think we need to call attachThreadPool using a specified pool
+		Gson gson = new Gson();
+		String read = gson.fromJson(args[0],String.class);
+
 		start();
+
 	}
 }

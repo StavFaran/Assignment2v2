@@ -1,5 +1,7 @@
 package bgu.spl.a2.sim;
+import bgu.spl.a2.Action;
 import bgu.spl.a2.Promise;
+import sun.misc.Queue;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -13,8 +15,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  */
 public class SuspendingMutex {
-
+	private Computer _computer;
 	private AtomicBoolean isLocked;
+	private Queue<Promise> promiseQueue;
+
 	
 	/**
 	 * Computer acquisition procedure
@@ -28,7 +32,7 @@ public class SuspendingMutex {
 	public Promise<Computer> down(String computerType){
 		if (!isLocked.compareAndSet(false, true)){
 			Promise<Computer> promise = new Promise<>();
-			//todo Add the promise list structure that te mutex holds
+			promiseQueue.enqueue(promise);
 			return promise;
 		}else return null;
 	}
@@ -40,5 +44,6 @@ public class SuspendingMutex {
 	 */
 	public void up(Computer computer){
 		isLocked.compareAndSet(true, false);
+		//Go over the Queue and activate the callbacks?
 	}
 }
