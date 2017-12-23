@@ -14,11 +14,13 @@ public class Unregister extends Action {
         public Unregister(String studentId){
             actionName = "Unregister";
             this.studentId = studentId;
-            actorState = actorThreadPool.getPrivaetState(actorId);
+
         }
     @Override
     protected void start() {
         LinkedList<Action> listOfActions = new LinkedList<>();
+
+        actorState = actorThreadPool.getPrivateState(actorId);
 
         if (((CoursePrivateState)actorState).getRegStudents().contains(studentId)) {
 

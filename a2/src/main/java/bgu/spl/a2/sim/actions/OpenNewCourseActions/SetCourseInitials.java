@@ -19,6 +19,7 @@ public class SetCourseInitials extends Action {
         then(new LinkedList<>(), ()->{
             ((CoursePrivateState)actorState).setAvailableSpots(availableSpots);
             ((CoursePrivateState)actorState).setPrequisites(prerequisits);
+
             complete(0);
         });
     }

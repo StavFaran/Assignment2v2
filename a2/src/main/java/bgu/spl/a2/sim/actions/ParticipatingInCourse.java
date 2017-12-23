@@ -20,11 +20,13 @@ public class ParticipatingInCourse extends Action {
         this.courseName = courseName;
         this.studentName = studentName;
         this.courseGrade = courseGrade;
-        this.courseState = (CoursePrivateState)actorThreadPool.getPrivaetState(courseName);
+
     }
     @Override
     protected void start() {
         LinkedList<Action> listOfActions = new LinkedList<>();
+
+        this.courseState = (CoursePrivateState)actorThreadPool.getPrivateState(courseName);
 
         if (courseState.getAvailableSpots()-courseState.getRegistered() > 0) {
             listOfActions.add(new IsValidRegister(courseState.getPrequisites()));

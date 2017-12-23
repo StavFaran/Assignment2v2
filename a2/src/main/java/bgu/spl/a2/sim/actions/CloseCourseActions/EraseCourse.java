@@ -10,7 +10,7 @@ import java.util.LinkedList;
 public class EraseCourse extends Action {
 
     public EraseCourse(){
-        actorState = actorThreadPool.getPrivaetState(actorId);
+        actorState = actorThreadPool.getPrivateState(actorId);
     }
 
     @Override

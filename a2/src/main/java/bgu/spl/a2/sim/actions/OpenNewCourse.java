@@ -6,6 +6,7 @@ import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.DepartmentPrivateState;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 //This Action is in the Department actor

@@ -5,24 +5,21 @@
  */
 package bgu.spl.a2.sim;
 import java.io.*;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.sql.Array;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import bgu.spl.a2.Action;
 import bgu.spl.a2.ActorThreadPool;
 import bgu.spl.a2.PrivateState;
-import bgu.spl.a2.sim.actions.AddNewStudent;
-import bgu.spl.a2.sim.actions.OpenNewCourse;
-import bgu.spl.a2.sim.actions.Unregister;
+import bgu.spl.a2.sim.actions.*;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.DepartmentPrivateState;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 /**
  * A class describing the simulator for part 2 of the assignment
@@ -36,8 +33,7 @@ public class Simulator {
 	* Begin the simulation Should not be called before attachActorThreadPool()
 	*/
     public static void start(){
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		actorThreadPool.start();
     }
 	
 	/**
@@ -65,13 +61,16 @@ public class Simulator {
 			Map<String, Object> data = (new Gson()).fromJson(new JsonReader(new FileReader(args[0])), new TypeToken<HashMap<String, Object>>() {}.getType());
 			actorThreadPool = new ActorThreadPool(((Double) data.get("threads")).intValue());
 			attachActorThreadPool(actorThreadPool);
-			//start();
+			start();
 
 			Warehouse warehouse = new Warehouse((List<Map<String, String>>) data.get("Computers"));
 
 			Phase((List<Map<String, Object>>) data.get("Phase 1"));
 			Phase((List<Map<String, Object>>) data.get("Phase 2"));
 			Phase((List<Map<String, Object>>) data.get("Phase 3"));
+
+			HashMap<String, PrivateState> toWrite = endSimulation();
+			oos.writeObject(toWrite);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -85,34 +84,137 @@ public class Simulator {
 			AddActorToPool(map);
 	}
 	public static void AddActorToPool(Map<String,Object> actionToAdd){
+		Action action;
 		String actor;
-		PrivateState actorState;
+		PrivateState privateState;
+
 		switch((String)actionToAdd.get("Action")) {
 			case "Open Course":
-				actor = (String)actionToAdd.get("Department");
-				String courseName = (String)actionToAdd.get("Course");
-				int availableSpots = (int)actionToAdd.get("Space");
-				LinkedList<String> prerequisits = (LinkedList)actionToAdd.get("Prerequisites");
-				actorThreadPool.submit(new OpenNewCourse(courseName, availableSpots, prerequisits), actor, new DepartmentPrivateState());
+				actor = (String) actionToAdd.get("Department");
+				privateState = new DepartmentPrivateState();
+				action = new OpenNewCourse(
+						(String) actionToAdd.get("Course"),
+						Integer.parseInt((String) actionToAdd.get("Space")),
+						arrayToLinked((ArrayList) actionToAdd.get("Prerequisites")));
 				break;
 			case "Add Student":
-				actor = (String)actionToAdd.get("Department");
-				String studentName = (String)actionToAdd.get("Student");
-				actorThreadPool.submit(new AddNewStudent(studentName), actor, new StudentPrivateState());
+				actor = (String) actionToAdd.get("Department");
+				privateState = new DepartmentPrivateState();
+				action = new AddNewStudent(
+						(String) actionToAdd.get("Student"));
 				break;
 			case "Participate In Course":
-				actor = (String)actionToAdd.get("Course");
-				actorThreadPool.submit(new AddNewStudent((String)actionToAdd.get("Student")), actor, new CoursePrivateState());
+				actor = (String) actionToAdd.get("Course");
+				privateState = new CoursePrivateState();
+				action = new ParticipatingInCourse(
+								(String) actionToAdd.get("Course"),
+								(String) actionToAdd.get("Student"),
+								((ArrayList) actionToAdd.get("Grade")).indexOf(0));
 				break;
 			case "Unregister":
-				actor = (String)actionToAdd.get("Course");
-				actorThreadPool.submit(new Unregister((String)actionToAdd.get("Student")), actor, new CoursePrivateState());
+				actor = (String) actionToAdd.get("Course");
+				privateState = new CoursePrivateState();
+				action = new Unregister(
+								(String) actionToAdd.get("Student"));
 				break;
 			case "Close Course":
-				actor = (String)actionToAdd.get("Course");
-				actorThreadPool.submit(new Unregister((String)actionToAdd.get("Student")), actor, new CoursePrivateState());
+				actor = (String) actionToAdd.get("Department");
+				privateState = new DepartmentPrivateState();
+				action = new CloseCourse(
+								(String) actionToAdd.get("Course"));
 				break;
+			case "Add Spaces":
+				actor = (String) actionToAdd.get("Course");
+				privateState = new CoursePrivateState();
+				action = new AddSpaces(
+								Integer.parseInt((String) actionToAdd.get("Space")));
+				break;
+			case "Register With Preferences":
+				actor = (String) actionToAdd.get("Student");
+				privateState = new StudentPrivateState();
+				action = new RegisterWithPreferences(
+								(ArrayList) actionToAdd.get("Preferences"),
+								(ArrayList) actionToAdd.get("Grade"));
+				break;
+			default:
+				actor = null;
+				action = null;
+				privateState = new DepartmentPrivateState();
+//			case "Administrative Check":
+//				actor = (String)actionToAdd.get("Department");
+//				actorThreadPool.submit(
+//						new CheckAdministrativeObligations(
+//								(ArrayList)actionToAdd.get("Students"),
+//								(String)actionToAdd.get("Computer"),
+//								(ArrayList)actionToAdd.get("Conditions")),
+//						actor,
+//						new StudentPrivateState());
+//				break;
+
+		}
+		if(actor != null) {
+			privateState.setName(actor);
+			actorThreadPool.submit(action, actor, privateState);
 		}
 
+
+
+	}
+	public static LinkedList<String> arrayToLinked(List<String> arrayList){
+		LinkedList<String> linkedList = new LinkedList<>();
+		for(String str: arrayList){
+			linkedList.add(String.valueOf(str));
+		}
+		return linkedList;
+	}
+
+	public static HashMap<String,PrivateState> endSimulation(){
+
+		ArrayList Departments = new ArrayList();
+		actorType(Departments, 0);
+		ArrayList Courses = new ArrayList();
+		actorType(Courses, 1);
+		ArrayList Students = new ArrayList();
+		actorType(Students, 2);
+
+		HashMap<String,PrivateState>data = new HashMap<>();
+		data.put("stav", new DepartmentPrivateState());
+		return data;
+
+//		Object obj;
+//		obj = new Object(){
+//			ArrayList department = Departments;
+//			ArrayList courses = Courses;
+//			ArrayList students = Students;
+//
+//		};
+//
+//		Gson gson = new Gson();
+//		try {
+//			gson.toJson(Departments, new FileWriter("results2.ser"));
+//
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+	}
+
+	public static void actorType(ArrayList list, int flag) {
+		for (Map.Entry<String, PrivateState> actor : actorThreadPool.getActors().entrySet()) {
+			if (flag==0) {
+				if (actor.getValue() instanceof DepartmentPrivateState) {
+					list.add(actor.getValue());
+				}
+			}
+			if (flag==1) {
+				if (actor.getValue() instanceof CoursePrivateState) {
+					list.add(actor.getValue());
+				}
+			}
+			if (flag==2) {
+				if (actor.getValue() instanceof StudentPrivateState) {
+					list.add(actor.getValue());
+				}
+			}
+		}
 	}
 }

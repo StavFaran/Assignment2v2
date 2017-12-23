@@ -12,7 +12,7 @@ public class AddSpaces extends Action {
     public AddSpaces(int num){
         actionName = "Add Spaces";
         this.num = num;
-        actorState = actorThreadPool.getPrivaetState(actorId);
+        actorState = actorThreadPool.getPrivateState(actorId);
     }
     @Override
     protected void start() {

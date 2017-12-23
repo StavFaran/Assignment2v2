@@ -83,7 +83,7 @@ public class ActorThreadPool {
 	 * @param actorId actor's id
 	 * @return actor's private state
 	 */
-	public PrivateState getPrivaetState(String actorId){
+	public PrivateState getPrivateState(String actorId){
 		if (actorPrivateState.contains(actorId))
 			return actorPrivateState.get(actorId);
 		else
@@ -152,7 +152,7 @@ public class ActorThreadPool {
 		notifyAll();
 	}
 
-	public void addActorToPool(String actorId, PrivateState actorState){
+	public synchronized void addActorToPool(String actorId, PrivateState actorState){
 		actorIsLocked.putIfAbsent(actorId, new AtomicBoolean(false));
 		actorListOfActions.putIfAbsent(actorId, new LinkedList<>());
 		actorPrivateState.putIfAbsent(actorId,actorState );

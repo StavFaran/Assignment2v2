@@ -1,11 +1,7 @@
 package bgu.spl.a2.sim.actions.ParticipatingInCourseActions;
 
 import bgu.spl.a2.Action;
-import bgu.spl.a2.ActorThreadPool;
-import bgu.spl.a2.sim.privateStates.CoursePrivateState;
-import bgu.spl.a2.sim.privateStates.DepartmentPrivateState;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
-import sun.awt.image.ImageWatched;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +14,7 @@ public class IsValidRegister extends  Action{
     public IsValidRegister(List<String> prerequisits){
         actionName = "isValidRegister";
         this.prerequisits = prerequisits ;
-        this.grades = ((StudentPrivateState)actorThreadPool.getPrivaetState(actorId)).getGrades();
+        this.grades = ((StudentPrivateState)actorThreadPool.getPrivateState(actorId)).getGrades();
     }
     @Override
     protected void start() {
