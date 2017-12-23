@@ -27,12 +27,8 @@ public abstract class PrivateState implements Serializable{
 		history.add(actionName);
 	}
 
-	public void setName(String name){
-		this.name = name;
-	}
-	public String getName(){
-		return name;
-	}
+	public abstract void setName(String name);
+	public abstract String getName();
 	
 	
 }

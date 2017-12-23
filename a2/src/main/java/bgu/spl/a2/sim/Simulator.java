@@ -8,10 +8,14 @@ import java.io.*;
 import java.sql.Array;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import bgu.spl.a2.Action;
 import bgu.spl.a2.ActorThreadPool;
 import bgu.spl.a2.PrivateState;
+import bgu.spl.a2.Promise;
+import bgu.spl.a2.TestClass.Help;
 import bgu.spl.a2.sim.actions.*;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.DepartmentPrivateState;
@@ -26,7 +30,7 @@ import com.google.gson.stream.JsonWriter;
  */
 public class Simulator {
 
-	
+	private static Warehouse warehouse;
 	public static ActorThreadPool actorThreadPool;
 	
 	/**
@@ -45,45 +49,46 @@ public class Simulator {
 		actorThreadPool = myActorThreadPool;
 	}
 	
-	/**
-	* shut down the simulation
-	* returns list of private states
-	*/
-	public static ConcurrentLinkedQueue<PrivateState> end(){
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
-	}
+
 	
 	
 	public static void main(String [] args) {
 		//From the args I think we need to call attachThreadPool using a specified pool
 		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("result.ser"))) {
-			Map<String, Object> data = (new Gson()).fromJson(new JsonReader(new FileReader(args[0])), new TypeToken<HashMap<String, Object>>() {}.getType());
+			Gson gson = new Gson();
+			Map<String, Object> data = gson.fromJson(new JsonReader(new FileReader(args[0])), new TypeToken<HashMap<String, Object>>() {}.getType());
 			actorThreadPool = new ActorThreadPool(((Double) data.get("threads")).intValue());
 			attachActorThreadPool(actorThreadPool);
 			start();
 
-			Warehouse warehouse = new Warehouse((List<Map<String, String>>) data.get("Computers"));
+			warehouse = new Warehouse((List<Map<String, String>>) data.get("Computers"));
 
 			Phase((List<Map<String, Object>>) data.get("Phase 1"));
 			Phase((List<Map<String, Object>>) data.get("Phase 2"));
 			Phase((List<Map<String, Object>>) data.get("Phase 3"));
 
-			HashMap<String, PrivateState> toWrite = endSimulation();
-			oos.writeObject(toWrite);
+			HashMap<String,PrivateState> result = end();
+			oos.writeObject(result);
 
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 
 
-	public static  void Phase(List<Map<String,Object>> list){
-		//add countdownlatch
+	public static void Phase(List<Map<String,Object>> list) throws InterruptedException {
+		CountDownLatch countdown = new CountDownLatch(list.size());
+		System.out.println(list.size());
 		for(Map<String, Object> map: list)
-			AddActorToPool(map);
+			AddActorToPool(map).subscribe(()->{
+				countdown.countDown();
+			});
+
+		countdown.await();
 	}
-	public static void AddActorToPool(Map<String,Object> actionToAdd){
+	public static Promise AddActorToPool(Map<String,Object> actionToAdd){
 		Action action;
 		String actor;
 		PrivateState privateState;
@@ -136,26 +141,28 @@ public class Simulator {
 								(ArrayList) actionToAdd.get("Preferences"),
 								(ArrayList) actionToAdd.get("Grade"));
 				break;
+
+			case "Administrative Check":
+				actor = (String)actionToAdd.get("Department");
+				privateState = new DepartmentPrivateState();
+				SuspendingMutex mutex = warehouse.getComputers().get(actionToAdd.get("Computer"));
+				action = new CheckAdministrativeObligations(
+								mutex,
+								(ArrayList)actionToAdd.get("Students"),
+								(ArrayList)actionToAdd.get("Conditions"));
+				break;
 			default:
 				actor = null;
 				action = null;
 				privateState = new DepartmentPrivateState();
-//			case "Administrative Check":
-//				actor = (String)actionToAdd.get("Department");
-//				actorThreadPool.submit(
-//						new CheckAdministrativeObligations(
-//								(ArrayList)actionToAdd.get("Students"),
-//								(String)actionToAdd.get("Computer"),
-//								(ArrayList)actionToAdd.get("Conditions")),
-//						actor,
-//						new StudentPrivateState());
-//				break;
 
 		}
 		if(actor != null) {
 			privateState.setName(actor);
+			privateState.addRecord(action.getActionName());
 			actorThreadPool.submit(action, actor, privateState);
-		}
+			return action.getResult();
+		}else{return null;}
 
 
 
@@ -168,53 +175,54 @@ public class Simulator {
 		return linkedList;
 	}
 
-	public static HashMap<String,PrivateState> endSimulation(){
+	/**
+	 * shut down the simulation
+	 * returns list of private states
+	 */
+	public static HashMap<String, PrivateState> end(){
 
-		ArrayList Departments = new ArrayList();
-		actorType(Departments, 0);
-		ArrayList Courses = new ArrayList();
-		actorType(Courses, 1);
-		ArrayList Students = new ArrayList();
-		actorType(Students, 2);
 
-		HashMap<String,PrivateState>data = new HashMap<>();
-		data.put("stav", new DepartmentPrivateState());
-		return data;
+		return (HashMap<String,PrivateState>)actorThreadPool.getActors();
 
-//		Object obj;
-//		obj = new Object(){
-//			ArrayList department = Departments;
-//			ArrayList courses = Courses;
-//			ArrayList students = Students;
+//		List Departments = new ArrayList();
+//		actorType(Departments, 0);
+//		ArrayList Courses = new ArrayList();
+//		actorType(Courses, 1);
+//		ArrayList Students = new ArrayList();
+//		actorType(Students, 2);
 //
-//		};
+//		actorThreadPool.getActors();
 //
-//		Gson gson = new Gson();
-//		try {
-//			gson.toJson(Departments, new FileWriter("results2.ser"));
+//		//To fix this rubbish later
+//		Help help = new Help(Departments, Courses, Students);
+//		String json = (new Gson()).toJson(help);
+//		System.out.print("as");
+
+		//To fix this rubbish later
+//		Help help = new Help(Departments, Courses, Students);
+//		String json = (new Gson()).toJson(help);
+//		System.out.print("as");
 //
-//		} catch (IOException e) {
-//			e.printStackTrace();
+//		return json;
+	}
+
+//	public static void actorType(Map map, int flag) {
+//		for (Map.Entry<String, PrivateState> actor : actorThreadPool.getActors().entrySet()) {
+//			if (flag==0) {
+//				if (actor.getValue() instanceof DepartmentPrivateState) {
+//					map.put();
+//				}
+//			}
+//			if (flag==1) {
+//				if (actor.getValue() instanceof CoursePrivateState) {
+//					list.add(actor.getValue());
+//				}
+//			}
+//			if (flag==2) {
+//				if (actor.getValue() instanceof StudentPrivateState) {
+//					list.add(actor.getValue());
+//				}
+//			}
 //		}
-	}
-
-	public static void actorType(ArrayList list, int flag) {
-		for (Map.Entry<String, PrivateState> actor : actorThreadPool.getActors().entrySet()) {
-			if (flag==0) {
-				if (actor.getValue() instanceof DepartmentPrivateState) {
-					list.add(actor.getValue());
-				}
-			}
-			if (flag==1) {
-				if (actor.getValue() instanceof CoursePrivateState) {
-					list.add(actor.getValue());
-				}
-			}
-			if (flag==2) {
-				if (actor.getValue() instanceof StudentPrivateState) {
-					list.add(actor.getValue());
-				}
-			}
-		}
-	}
+//	}
 }

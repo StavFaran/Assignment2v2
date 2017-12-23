@@ -1,6 +1,7 @@
 package bgu.spl.a2.sim.privateStates;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import bgu.spl.a2.PrivateState;
 
@@ -9,6 +10,7 @@ import bgu.spl.a2.PrivateState;
  */
 public class StudentPrivateState extends PrivateState{
 
+	private String Student;
 	private HashMap<String, Integer> grades;
 	private long signature;
 	
@@ -18,6 +20,7 @@ public class StudentPrivateState extends PrivateState{
 	 * this may cause automatic tests to fail..
 	 */
 	public StudentPrivateState() {
+		history = new LinkedList<>();
 		grades = new HashMap<>();
 		//todo implement Sig;
 	}
@@ -29,4 +32,15 @@ public class StudentPrivateState extends PrivateState{
 	public long getSignature() {
 		return signature;
 	}
+	public void setSignature(long signature){
+		this.signature = signature;
+	}
+
+	public void setName(String name){
+		Student = name;
+	}
+	public String getName(){
+		return Student;
+	}
+
 }

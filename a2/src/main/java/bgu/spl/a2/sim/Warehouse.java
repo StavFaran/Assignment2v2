@@ -3,6 +3,7 @@ package bgu.spl.a2.sim;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * represents a warehouse that holds a finite amount of computers
@@ -10,16 +11,16 @@ import java.util.List;
  * 
  */
 public class Warehouse {
-    private HashMap< Computer, SuspendingMutex> computers;
+    private Map< Computer, SuspendingMutex> computers;
 
     public Warehouse(List list){
         computers = new HashMap<>();
     }
-    public HashMap<Computer, SuspendingMutex> getComputers(){
+    public Map<Computer, SuspendingMutex> getComputers(){
         return computers;
     }
-    public void addComputer(String type, long sigSuccess, long sigFail){
-        //computers.put(type, )
-    }
+//    public void addComputer(String type, long sigSuccess, long sigFail){
+//        computers.put(type, new SuspendingMutex(computers.));
+//    }
 	
 }

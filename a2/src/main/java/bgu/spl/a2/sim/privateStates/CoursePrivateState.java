@@ -10,6 +10,7 @@ import bgu.spl.a2.PrivateState;
  */
 public class CoursePrivateState extends PrivateState{
 
+	private String Course;
 	private Integer availableSpots;
 	private Integer registered;
 	protected List<String> regStudents;
@@ -47,5 +48,12 @@ public class CoursePrivateState extends PrivateState{
 
 	public void setAvailableSpots(int spots){
 		this.availableSpots = spots;
+	}
+
+	public void setName(String name){
+		Course = name;
+	}
+	public String getName(){
+		return Course;
 	}
 }

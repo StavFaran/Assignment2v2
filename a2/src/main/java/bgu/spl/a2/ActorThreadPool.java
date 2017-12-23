@@ -55,10 +55,12 @@ public class ActorThreadPool {
 					int myversion = vm.getVersion();
 
 					for (Map.Entry<String, AtomicBoolean> entry : actorIsLocked.entrySet()) {
-						if (entry.getValue().get() == false) {
-							String actor = entry.getKey();
-							callAction(actor, actorPrivateState.get(actor));
-						}
+						if (!Thread.interrupted())
+							if (entry.getValue().get() == false) {
+								String actor = entry.getKey();
+								callAction(actor, actorPrivateState.get(actor));
+							}
+							else break;
 
 					}
 

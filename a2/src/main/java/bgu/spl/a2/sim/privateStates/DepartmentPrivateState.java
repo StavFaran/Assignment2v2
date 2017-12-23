@@ -9,6 +9,7 @@ import bgu.spl.a2.PrivateState;
  * this class describe department's private state
  */
 public class DepartmentPrivateState extends PrivateState{
+	private String Department;
 	private List<String> courseList;
 	private List<String> studentList;
 	
@@ -18,6 +19,7 @@ public class DepartmentPrivateState extends PrivateState{
 	 * this may cause automatic tests to fail..
 	 */
 	public DepartmentPrivateState() {
+		history = new LinkedList<>();
 		courseList = new LinkedList<>();
 		studentList = new LinkedList<>();
 	}
@@ -28,6 +30,13 @@ public class DepartmentPrivateState extends PrivateState{
 
 	public List<String> getStudentList() {
 		return studentList;
+	}
+
+	public void setName(String name){
+		Department = name;
+	}
+	public String getName(){
+		return Department;
 	}
 	
 }

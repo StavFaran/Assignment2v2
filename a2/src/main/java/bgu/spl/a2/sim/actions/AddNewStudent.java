@@ -18,7 +18,7 @@ public class AddNewStudent extends Action{
     @Override
     protected void start() {
         LinkedList<Action> listOfActions = new LinkedList<>();
-
+        System.out.println("stavvvv");
         listOfActions.add(new Action() {
             @Override
             protected void start() {
@@ -32,6 +32,7 @@ public class AddNewStudent extends Action{
 
         then(listOfActions, ()->{
             ((DepartmentPrivateState)actorState).getStudentList().add(studentName);
+
             complete(0);
         });
     }
