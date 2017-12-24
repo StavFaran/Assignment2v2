@@ -19,9 +19,11 @@ public class RegisterWithPreferences extends Action{
     }
     @Override
     protected void start() {
+        StudentPrivateState state = (StudentPrivateState) actorThreadPool.getActors().get(actorId);
+
         LinkedList<Action> listOfActions = new LinkedList<>();
 
-        if (!preferences.isEmpty() && ((StudentPrivateState) actorState).getGrades().containsKey(preferences.get(0))) {
+        if (!preferences.isEmpty() && state.getGrades().containsKey(preferences.get(0))) {
             listOfActions.add(new ParticipatingInCourse(preferences.get(0), actorId, grades.get(0)));
 
             then(listOfActions, () -> {
@@ -33,6 +35,5 @@ public class RegisterWithPreferences extends Action{
                 complete(0);
             });
         }
-        //TODO Recheck this
     }
 }

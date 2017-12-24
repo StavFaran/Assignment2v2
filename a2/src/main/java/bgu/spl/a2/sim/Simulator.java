@@ -65,7 +65,7 @@ public class Simulator {
 
 			Phase((List<Map<String, Object>>) data.get("Phase 1"));
 			Phase((List<Map<String, Object>>) data.get("Phase 2"));
-//			Phase((List<Map<String, Object>>) data.get("Phase 3"));
+			Phase((List<Map<String, Object>>) data.get("Phase 3"));
 
 			HashMap<String,PrivateState> result = new HashMap<>(end());
 			oos.writeObject(result);
@@ -147,8 +147,8 @@ public class Simulator {
 				SuspendingMutex mutex = warehouse.getComputers().get(actionToAdd.get("Computer"));
 				action = new CheckAdministrativeObligations(
 								mutex,
-								(ArrayList)actionToAdd.get("Students"),
-								(ArrayList)actionToAdd.get("Conditions"));
+								(ArrayList)actionToAdd.get("Conditions"),
+								(ArrayList)actionToAdd.get("Students"));
 				break;
 			default:
 				actor = null;
@@ -160,6 +160,7 @@ public class Simulator {
 			privateState.setName(actor);
 			privateState.addRecord(action.getActionName());
 			actorThreadPool.submit(action, actor, privateState);
+			System.out.println(action.getActionName());
 			return action.getResult();
 		}else{return null;}
 
