@@ -12,14 +12,13 @@ public class AddSpaces extends Action {
     public AddSpaces(int num){
         actionName = "Add Spaces";
         this.num = num;
-        actorState = actorThreadPool.getPrivaetState(actorId);
+        actorState = actorThreadPool.getActors().get(actorId);
     }
     @Override
     protected void start() {
-
-        then(new LinkedList<>(), ()->{
-            ((CoursePrivateState)actorState).setAvailableSpots(((CoursePrivateState)actorState).getAvailableSpots()+num);
-            complete(0);
-        });
+        CoursePrivateState state = (CoursePrivateState) actorThreadPool.getActors().get(actorId);
+        //if the course is closed dont add
+        state.setAvailableSpots(state.getAvailableSpots()+num);
+        complete(0);
     }
 }

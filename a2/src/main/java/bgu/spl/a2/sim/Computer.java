@@ -15,6 +15,13 @@ public class Computer {
 		this.computerType = computerType;
 	}
 
+	public SuspendingMutex getSuspendingMutex(){
+		return suspendingMutex;
+	}
+
+	public String getComputerType(){
+		return computerType;
+	}
 
 	/**
 	 * this method checks if the courses' grades fulfill the conditions
@@ -38,5 +45,12 @@ public class Computer {
 		}
 
 		if (isValid) return successSig; else return failSig;
+	}
+
+	public void setFailSig(long failSig){
+		this.failSig = failSig;
+	}
+	public void setSuccessSig(long successSig){
+		this.successSig = successSig;
 	}
 }

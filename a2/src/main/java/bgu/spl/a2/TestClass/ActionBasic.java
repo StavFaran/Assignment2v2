@@ -10,14 +10,14 @@ public class ActionBasic extends Action{
 
 //    public ActionBasic()
     @Override
-    protected synchronized void start() {
+    protected void start() {
         //Creates the list of actions I need to finish before doing my task
         Collection<? extends Action<?>> listOfActions = new LinkedList<>();
         addToListOfActions();
 
         if (!listOfActions.isEmpty())
             for(Action<?> action: listOfActions){
-                sendMessage(action, actorId, actorState); // todo - where do we want to add the action??????
+                sendMessage(action, actorId, new BaseState()); // todo - where do we want to add the action??????
             }
 
         then(listOfActions, ()->{

@@ -16,18 +16,15 @@ public class CloseCourse extends Action {
     public CloseCourse(String courseName){
         actionName = "Close A Course";
         this.courseName = courseName;
-        depState = (DepartmentPrivateState)actorThreadPool.getPrivaetState(actorId);
+        depState = (DepartmentPrivateState)actorThreadPool.getActors().get(actorId);
     }
     @Override
     protected void start() {
-        LinkedList<Action> listOfActions = new LinkedList<>();
+        DepartmentPrivateState state = (DepartmentPrivateState) actorThreadPool.getActors().get(actorId);
 
-        listOfActions.add(new EraseCourse());
-
-        then(listOfActions, ()->{
-            depState.getCourseList().remove(courseName);
-            complete(0);
-        });
+        state.getCourseList().remove(courseName);
+        actorThreadPool.submit(new EraseCourse(), courseName, new CoursePrivateState());
+        complete(0);
     }
 
 

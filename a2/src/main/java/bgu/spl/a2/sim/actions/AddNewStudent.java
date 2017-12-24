@@ -17,22 +17,11 @@ public class AddNewStudent extends Action{
     }
     @Override
     protected void start() {
-        LinkedList<Action> listOfActions = new LinkedList<>();
+        DepartmentPrivateState state = (DepartmentPrivateState) actorThreadPool.getActors().get(actorId);
 
-        listOfActions.add(new Action() {
-            @Override
-            protected void start() {
-                then(new LinkedList<>(), ()->{
-                    complete(0);
-                });
-            }
-        });
+        state.getStudentList().add(studentName);
+        actorThreadPool.submit(null, studentName, new StudentPrivateState());
 
-        sendMessage(listOfActions.getFirst(), studentName, new StudentPrivateState());
-
-        then(listOfActions, ()->{
-            ((DepartmentPrivateState)actorState).getStudentList().add(studentName);
-            complete(0);
-        });
+        complete(0);
     }
 }

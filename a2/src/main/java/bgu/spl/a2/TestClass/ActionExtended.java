@@ -8,7 +8,7 @@ import java.util.LinkedList;
 public class ActionExtended extends Action{
 
 
-    protected synchronized void start() {
+    protected void start() {
         //Creates the list of actions I need to finish before doing my task
         LinkedList<Action> listOfActions = new LinkedList<>();
 
@@ -17,7 +17,7 @@ public class ActionExtended extends Action{
 
         if (!listOfActions.isEmpty())
             for(Action action: listOfActions){
-                sendMessage(action, actorId, actorState); // todo - where do we want to add the action??????
+                sendMessage(action, actorId, new BaseState()); // todo - where do we want to add the action??????
             }
 
         then(listOfActions, ()->{

@@ -23,6 +23,8 @@ public abstract class Action<R> {
     protected Promise<R> promise = new Promise<>();
     private callback myCallback=null;
     protected PrivateState actorState;
+    protected AtomicInteger countToComplete;
+
 	/**
      * start handling the action - note that this method is protected, a thread
      * cannot call it directly.
@@ -42,7 +44,7 @@ public abstract class Action<R> {
     * public/private/protected
     *
     */
-   /*package*/ final synchronized void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
+   /*package*/ final void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
        actorThreadPool = pool;
        this.actorId = actorId;
        this.actorState = actorState;
@@ -64,9 +66,9 @@ public abstract class Action<R> {
      * @param actions
      * @param callback the callback to execute once all the results are resolved
      */
-    protected synchronized final void then(Collection<? extends Action<?>> actions, callback callback) {
+    protected final void then(Collection<? extends Action<?>> actions, callback callback) {
         if (!actions.isEmpty()) {
-            AtomicInteger countToComplete = new AtomicInteger(actions.size());
+            countToComplete = new AtomicInteger(actions.size());
             for (Action action : actions) {
                 action.getResult().subscribe(() -> {
                     countToComplete.decrementAndGet();
@@ -92,7 +94,7 @@ public abstract class Action<R> {
      *
      * @param result - the action calculated result
      */
-    protected synchronized final void complete(R result) {
+    protected final void complete(R result) {
        	promise.resolve(result);
 
     }

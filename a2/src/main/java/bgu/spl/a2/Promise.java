@@ -1,6 +1,8 @@
 package bgu.spl.a2;
 
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * this class represents a deferred result i.e., an object that eventually will
@@ -20,9 +22,14 @@ import java.util.LinkedList;
 public class Promise<T>{
 
 	private T result=null;
-	private boolean resolved=false;
-	private LinkedList<callback> mylist = new LinkedList<>();
+	private boolean resolved;
+	private ConcurrentLinkedQueue<callback> callbackList;
 
+	public Promise(){
+
+		resolved = false;
+		callbackList = new ConcurrentLinkedQueue<>();
+	}
 	/**
 	 *
 	 * @return the resolved value if such exists (i.e., if this object has been
@@ -65,16 +72,16 @@ public class Promise<T>{
 	 * @param value
 	 *            - the value to resolve this promise object with
 	 */
-	public synchronized void resolve(T value){
-		if (resolved)
+	public void resolve(T value){
+		if (isResolved())
 			throw new IllegalStateException("this object is already resolved");
 		else{
 			resolved = true;
 			result = value;
-			for (callback callBack: mylist) {
+			for (callback callBack: callbackList) {
 				callBack.call();
 			}
-			mylist.clear();
+			callbackList.clear();
 		}
 
 	}
@@ -95,17 +102,13 @@ public class Promise<T>{
 	 * this function needs to be synced so that the
 	 */
 	public void subscribe(callback callback) {
-		if (callback == null)
-			throw new RuntimeException("callback can't be null");
-		else {
 			if (!isResolved())
-				mylist.add(callback);
+				callbackList.add(callback);
 			else
 				callback.call();
-		}
 	}
 
-	public LinkedList<callback> getMylist(){
-		return mylist;
+	public ConcurrentLinkedQueue<callback> getCallbackList(){
+		return callbackList;
 	}
 }

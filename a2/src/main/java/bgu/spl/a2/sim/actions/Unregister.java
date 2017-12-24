@@ -14,21 +14,19 @@ public class Unregister extends Action {
         public Unregister(String studentId){
             actionName = "Unregister";
             this.studentId = studentId;
-            actorState = actorThreadPool.getPrivaetState(actorId);
+
         }
     @Override
     protected void start() {
-        LinkedList<Action> listOfActions = new LinkedList<>();
+        CoursePrivateState state = (CoursePrivateState) actorThreadPool.getActors().get(actorId);
 
-        if (((CoursePrivateState)actorState).getRegStudents().contains(studentId)) {
-
-            then(listOfActions, () -> {
-                actorThreadPool.submit(new RemoveFromGrades(actorId), studentId, new StudentPrivateState());
-                ((CoursePrivateState) actorState).getRegStudents().add(studentId);
-                ((CoursePrivateState) actorState).setAvailableSpots(((CoursePrivateState) actorState).getAvailableSpots() - 1);
-                complete(0);
-            });
-        }else{complete(0);}
+        if (state.getRegStudents().contains(studentId)) {
+            actorThreadPool.submit(new RemoveFromGrades(actorId), studentId, new StudentPrivateState());
+            state.getRegStudents().remove(studentId);
+            state.setRegistered(state.getRegistered() - 1);
+            state.setAvailableSpots(state.getAvailableSpots() + 1);
+        }
+        complete(0);
     }
 }
 

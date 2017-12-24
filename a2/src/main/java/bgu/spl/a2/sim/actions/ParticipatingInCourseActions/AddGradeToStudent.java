@@ -15,17 +15,14 @@ public class AddGradeToStudent extends Action{
     public AddGradeToStudent (String courseName, int grade){
         this.courseName = courseName;
         this.grade = grade;
-        grades = ((StudentPrivateState)actorThreadPool.getActors().get(actorId)).getGrades();
+
     }
 
 
     @Override
     protected void start() {
-        LinkedList<Action> listOfActions = new LinkedList<>();
-
-        then(listOfActions, ()->{
-            grades.put(courseName, grade);
-            complete(0);
-        });
+        grades = ((StudentPrivateState)actorThreadPool.getActors().get(actorId)).getGrades();
+        grades.put(courseName, grade);
+        complete(0);
     }
 }

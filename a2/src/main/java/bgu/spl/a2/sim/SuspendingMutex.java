@@ -19,6 +19,11 @@ public class SuspendingMutex {
 	private AtomicBoolean isLocked;
 	private Queue<Promise> promiseQueue;
 
+	public SuspendingMutex(Computer computer){
+		_computer = computer;
+		isLocked = new AtomicBoolean(false);
+		promiseQueue = new Queue<>();
+	}
 	
 	/**
 	 * Computer acquisition procedure
@@ -45,5 +50,9 @@ public class SuspendingMutex {
 	public void up(Computer computer){
 		isLocked.compareAndSet(true, false);
 		//Go over the Queue and activate the callbacks?
+	}
+
+	public Computer getComputer(){
+		return _computer;
 	}
 }

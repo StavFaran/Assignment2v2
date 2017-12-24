@@ -15,8 +15,9 @@ public class RemoveFromGrades extends Action {
 
     @Override
     protected void start() {
+        StudentPrivateState state = (StudentPrivateState) actorThreadPool.getActors().get(actorId);
         then(new LinkedList<>(), ()->{
-            ((StudentPrivateState)actorState).getGrades().remove(courseName);
+            state.getGrades().remove(courseName);
             complete(0);
         });
 

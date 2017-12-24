@@ -4,28 +4,31 @@ import bgu.spl.a2.Action;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 //This Action is in the Student's actor.
 public class RegisterWithPreferences extends Action{
-    private LinkedList<String> preferenceList;
+    private ArrayList<String> preferences;
+    private ArrayList<Integer> grades;
 
-    public RegisterWithPreferences(LinkedList<String> preferenceList){
+    public RegisterWithPreferences(ArrayList<String> preferences, ArrayList<Integer> grades){
         actionName = "Register With Preferences";
-        this.preferenceList = preferenceList;
+        this.preferences = preferences;
+        this.grades = grades;
     }
     @Override
     protected void start() {
         LinkedList<Action> listOfActions = new LinkedList<>();
 
-        if (!preferenceList.isEmpty() && ((StudentPrivateState) actorState).getGrades().containsKey(preferenceList.getFirst())) {
-            int grade = ((StudentPrivateState) actorState).getGrades().get(preferenceList.getFirst());
-            listOfActions.add(new ParticipatingInCourse(preferenceList.getFirst(), actorId, grade));
+        if (!preferences.isEmpty() && ((StudentPrivateState) actorState).getGrades().containsKey(preferences.get(0))) {
+            listOfActions.add(new ParticipatingInCourse(preferences.get(0), actorId, grades.get(0)));
 
             then(listOfActions, () -> {
-                if (!preferenceList.isEmpty() && !listOfActions.isEmpty() && !(boolean) listOfActions.getFirst().getResult().get()) {
-                    preferenceList.removeFirst();
-                    sendMessage(new RegisterWithPreferences(preferenceList), actorId, new CoursePrivateState());
+                if (!preferences.isEmpty() && !listOfActions.isEmpty() && !(boolean) listOfActions.getFirst().getResult().get()) {
+                    preferences.remove(0);
+                    grades.remove(0);
+                    sendMessage(new RegisterWithPreferences(preferences, grades), actorId, new CoursePrivateState());
                 }
                 complete(0);
             });

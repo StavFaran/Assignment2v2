@@ -10,6 +10,7 @@ import bgu.spl.a2.PrivateState;
  */
 public class CoursePrivateState extends PrivateState{
 
+	private String Course;
 	private Integer availableSpots;
 	private Integer registered;
 	protected List<String> regStudents;
@@ -21,8 +22,10 @@ public class CoursePrivateState extends PrivateState{
 	 * this may cause automatic tests to fail..
 	 */
 	public CoursePrivateState() {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		history = new LinkedList<>();
+		registered = 0;
+		regStudents = new LinkedList<>();
+		prequisites = new LinkedList<>();
 	}
 
 	public Integer getAvailableSpots() {
@@ -47,5 +50,14 @@ public class CoursePrivateState extends PrivateState{
 
 	public void setAvailableSpots(int spots){
 		this.availableSpots = spots;
+	}
+
+	public void setRegistered(int reg){this.registered = reg;}
+
+	public void setName(String name){
+		Course = name;
+	}
+	public String getName(){
+		return Course;
 	}
 }

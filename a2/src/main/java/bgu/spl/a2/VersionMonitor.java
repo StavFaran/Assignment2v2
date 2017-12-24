@@ -1,5 +1,6 @@
 package bgu.spl.a2;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -20,19 +21,23 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class VersionMonitor {
 
-    private AtomicInteger myversion = new AtomicInteger();
-
-    public int getVersion() {
-        return myversion.get();
+    private AtomicInteger version;
+    public VersionMonitor(){
+        version = new AtomicInteger(0);
     }
 
-    public void inc() {
-        myversion.incrementAndGet();
+    public int getVersion() {
+        return version.get();
+    }
+
+    public synchronized void inc() {
+        version.incrementAndGet();
+        notifyAll();
     }
 
     /*this function is synchronized in order to perform 'busy wait'*/
     public synchronized void await(int version) throws InterruptedException {
-        while (version == myversion.get()){
+        while (version == this.version.get()){
             this.wait();
         }
     }

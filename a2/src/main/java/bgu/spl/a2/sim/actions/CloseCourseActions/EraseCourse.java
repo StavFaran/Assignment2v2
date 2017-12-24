@@ -10,11 +10,13 @@ import java.util.LinkedList;
 public class EraseCourse extends Action {
 
     public EraseCourse(){
-        actorState = actorThreadPool.getPrivaetState(actorId);
+        actorState = actorThreadPool.getActors().get(actorId);
     }
 
     @Override
     protected void start() {
+        CoursePrivateState state = (CoursePrivateState) actorThreadPool.getActors().get(actorId);
+
         LinkedList<Action> listOfActions = new LinkedList<>();
 
         //This will send every student his unregister function
@@ -25,7 +27,7 @@ public class EraseCourse extends Action {
         }
 
         then(listOfActions, ()->{
-            ((CoursePrivateState)actorState).setAvailableSpots(-1);
+            state.setAvailableSpots(-1);
             complete(0);
         });
 

@@ -1,11 +1,11 @@
 package bgu.spl.a2;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-
-import java.util.*;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * represents an actor thread pool - to understand what this class does please
@@ -23,9 +23,9 @@ public class ActorThreadPool {
 	private Thread[] myThreads;
 	private AtomicInteger actorsAvailable;
 
-	private ConcurrentHashMap<String, LinkedList<Action>> actorListOfActions;
+	private ConcurrentHashMap<String, ConcurrentLinkedQueue<Action>> actorListOfActions;
 	private ConcurrentHashMap<String, PrivateState> actorPrivateState;
-	private ConcurrentHashMap<String, AtomicBoolean> actorIsLocked;
+	private ConcurrentHashMap<String, AtomicBoolean> availableActors;
 
 	private VersionMonitor vm;
 
@@ -45,26 +45,38 @@ public class ActorThreadPool {
 		this.nthreads = nthreads;
 		actorListOfActions = new ConcurrentHashMap<>();
 		actorPrivateState = new ConcurrentHashMap<>();
-		actorIsLocked = new ConcurrentHashMap<>();
+		availableActors = new ConcurrentHashMap<>();
 		vm = new VersionMonitor();
 
 		myThreads = new Thread[this.nthreads];
 		for(int i=0; i<this.nthreads; i++) {
 			myThreads[i] = new Thread(() -> {
-				while(true) {
+				boolean repeat=true;
+				while(repeat && (!Thread.currentThread().isInterrupted())) {
 					int myversion = vm.getVersion();
+					repeat = false;
 
-					for (Map.Entry<String, AtomicBoolean> entry : actorIsLocked.entrySet()) {
-						if (entry.getValue().get() == false) {
-							String actor = entry.getKey();
-							callAction(actor, actorPrivateState.get(actor));
+					for (Map.Entry<String, AtomicBoolean> entry : availableActors.entrySet()) {
+						String actor = entry.getKey();
+						if (availableActors.get(actor).compareAndSet(true, false)) {
+							if (!actorListOfActions.get(actor).isEmpty()) {
+								actorListOfActions.get(actor).poll().handle(this, actor, actorPrivateState.get(actor));
+							}
+							//if (!actorListOfActions.get(actor).isEmpty())
+							repeat = repeat || (!actorListOfActions.get(actor).isEmpty());
+								availableActors.get(actor).set(true);
 						}
-
+//								callAction(entry.getKey());
 					}
-
-					try {
-						vm.await(myversion);
-					} catch (InterruptedException e) {}
+					if(!repeat) {
+						repeat = true;
+						try {
+							vm.await(myversion);
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							repeat = false;
+						}
+					}
 				}
 			});
 		}
@@ -83,7 +95,7 @@ public class ActorThreadPool {
 	 * @param actorId actor's id
 	 * @return actor's private state
 	 */
-	public PrivateState getPrivaetState(String actorId){
+	public PrivateState getPrivateState(String actorId){
 		if (actorPrivateState.contains(actorId))
 			return actorPrivateState.get(actorId);
 		else
@@ -103,12 +115,16 @@ public class ActorThreadPool {
 	 *
 	 *            This function should be synchronized to keep it thread safe
 	 */
-	public synchronized void submit(Action<?> action, String actorId, PrivateState actorState) {
-		if (!actorListOfActions.containsKey(actorId))
-			addActorToPool(actorId, actorState);
-		actorListOfActions.get(actorId).add(action);
-		vm.inc();
-		notifyAll();
+	public void submit(Action<?> action, String actorId, PrivateState actorState) {
+
+//		System.out.println("submit action");
+		availableActors.putIfAbsent(actorId, new AtomicBoolean(true));
+		actorListOfActions.putIfAbsent(actorId, new ConcurrentLinkedQueue<>());
+		actorPrivateState.putIfAbsent(actorId,actorState);
+		if (action != null) {
+			actorListOfActions.get(actorId).add(action);
+			vm.inc();
+		}
 	}
 
 	/**
@@ -125,6 +141,10 @@ public class ActorThreadPool {
 		for(Thread thread: myThreads){
 			thread.interrupt();
 		}
+		for(Thread thread: myThreads){
+			thread.join();
+		}
+
 	}
 
 	/**
@@ -135,32 +155,8 @@ public class ActorThreadPool {
 			myThreads[i].start();
 	}
 
-	public synchronized void callAction(String actorId, PrivateState actorState){
-		if (!actorListOfActions.get(actorId).isEmpty()) {
-			beforeFunctionCall(actorId);
-			actorListOfActions.get(actorId).removeFirst().handle(this, actorId, actorState);
-			afterFunctionCall(actorId);
-		}
-	}
+	public void callAction(String actorId){
 
-	public void beforeFunctionCall(String actorId){
-		actorIsLocked.get(actorId).compareAndSet(false, true);
-	}
-	public synchronized void afterFunctionCall(String actorId) {
-		actorIsLocked.get(actorId).compareAndSet(true, false);
-		vm.inc();
-		notifyAll();
-	}
-
-	public void addActorToPool(String actorId, PrivateState actorState){
-		actorIsLocked.putIfAbsent(actorId, new AtomicBoolean(false));
-		actorListOfActions.putIfAbsent(actorId, new LinkedList<>());
-		actorPrivateState.putIfAbsent(actorId,actorState );
-	}
-	public void removeActorFromPool(String actorId){
-		actorIsLocked.remove(actorId);
-		actorListOfActions.remove(actorId);
-		actorPrivateState.remove(actorId);
 	}
 
 }
