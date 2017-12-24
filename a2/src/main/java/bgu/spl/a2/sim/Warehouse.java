@@ -11,13 +11,17 @@ import java.util.Map;
  * 
  */
 public class Warehouse {
-    private Map< Computer, SuspendingMutex> computers;
+    private Map< String, SuspendingMutex> computerList;
 
-    public Warehouse(List list){
-        computers = new HashMap<>();
+    public Warehouse(List<Map<String,String>> list){
+        computerList = new HashMap<>();
+        for(Map<String, String> map: list){
+            Computer computer = new Computer(map.get("Type"));
+            computerList.put( map.get("Type"), new SuspendingMutex(computer));
+        }
     }
-    public Map<Computer, SuspendingMutex> getComputers(){
-        return computers;
+    public Map<String, SuspendingMutex> getComputers(){
+        return computerList;
     }
 //    public void addComputer(String type, long sigSuccess, long sigFail){
 //        computers.put(type, new SuspendingMutex(computers.));

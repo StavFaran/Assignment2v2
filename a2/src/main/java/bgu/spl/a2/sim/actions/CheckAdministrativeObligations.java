@@ -7,6 +7,7 @@ import bgu.spl.a2.sim.SuspendingMutex;
 import bgu.spl.a2.sim.actions.CheckAdministrativeCheckActions.GetGrade;
 import bgu.spl.a2.sim.actions.CheckAdministrativeCheckActions.SetSignature;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,25 +24,24 @@ public class CheckAdministrativeObligations extends Action {
         this.mutex = mutex;
         this.conditions = conditions;
         this.students = students;
+//        System.out.println(mutex.getComputer());
+//        System.out.println(mutex.getComputer().getComputerType());
         this.computer = mutex.getComputer().getComputerType();
     }
     @Override
     protected void start() {
-        LinkedList<Action> listOfActions = new LinkedList<>();
-
-        Promise<Computer> promise = mutex.down(computer);
+        Promise<Computer> promise = mutex.down();
 
         promise.subscribe(()->{
             for(String student: students){
-                Action action = new GetGrade();
-                listOfActions.add(action);
-                sendMessage(action, student, new StudentPrivateState());
+                StudentPrivateState studentState = (StudentPrivateState)actorThreadPool.getActors().get(student);
+                long sig = promise.get().checkAndSign(conditions, studentState.getGrades());
+                actorThreadPool.submit(new SetSignature(sig), student, new StudentPrivateState());
             }
-        });
-        then(listOfActions, ()->{
-            for (int i = 0; i < students.size(); i++) {
-                long sig = mutex.getComputer().checkAndSign(conditions, (HashMap) listOfActions.get(i).getResult().get());
-                sendMessage(new SetSignature(sig), students.get(i), new StudentPrivateState());
+            try {
+                mutex.up();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         });
 

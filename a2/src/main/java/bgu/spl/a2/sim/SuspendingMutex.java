@@ -24,32 +24,22 @@ public class SuspendingMutex {
 		isLocked = new AtomicBoolean(false);
 		promiseQueue = new Queue<>();
 	}
-	
-	/**
-	 * Computer acquisition procedure
-	 * Note that this procedure is non-blocking and should return immediatly
-	 * 
-	 * @param computerType
-	 * 					computer's type
-	 * 
-	 * @return a promise for the requested computer
-	 */
-	public Promise<Computer> down(String computerType){
+
+	public Promise<Computer> down(){
+		Promise<Computer> promise = new Promise<>();
 		if (!isLocked.compareAndSet(false, true)){
-			Promise<Computer> promise = new Promise<>();
 			promiseQueue.enqueue(promise);
-			return promise;
-		}else return null;
+		}else {
+			promise.resolve(_computer);
+		}
+		return promise;
 	}
-	/**
-	 * Computer return procedure
-	 * releases a computer which becomes available in the warehouse upon completion
-	 * 
-	 * @param computer
-	 */
-	public void up(Computer computer){
-		isLocked.compareAndSet(true, false);
-		//Go over the Queue and activate the callbacks?
+
+	public void up() throws InterruptedException {
+		if (!promiseQueue.isEmpty())
+			promiseQueue.dequeue().resolve(_computer);
+		else
+			isLocked.set(false);
 	}
 
 	public Computer getComputer(){
